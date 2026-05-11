@@ -56,10 +56,15 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
       }).addTo(map);
 
       poly.on('mouseover', (e: any) => {
-        e.target.setStyle({ weight: 10, opacity: 1 });
+        if (e.target) {
+          (e.target as any).setStyle({ weight: 10, opacity: 1 });
+        }
       });
+
       poly.on('mouseout', (e: any) => {
-        e.target.setStyle({ weight: 6, opacity: 0.8 });
+        if (e.target) {
+          (e.target as any).setStyle({ weight: 6, opacity: 0.8 });
+        }
       });
 
       poly.on('click', (e) => {
