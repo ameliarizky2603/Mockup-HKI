@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import '@maplibre/maplibre-gl-leaflet';
 import { MapRoute, MapLocation } from '../hooks/useJTTSData';
 
 interface Props {
@@ -37,10 +39,9 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
       attributionControl: true
     });
 
-    // MapID Satellite style
-    (L as any).maplibreGL({
-      style: 'https://basemap.mapid.io/styles/satellite/style.json?key=false',
-      attribution: '&copy; MapID'
+    // Esri Satellite Layer (Stable & High Quality)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
     }).addTo(map);
 
     // Custom zoom control

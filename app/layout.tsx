@@ -30,10 +30,6 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-        
-        <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
-        <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
-        <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.19/leaflet-maplibre-gl.js"></script>
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
