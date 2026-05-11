@@ -1,0 +1,501 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --bg-main: #0d1117;
+  --bg-panel: #111827;
+  --bg-panel-alt: #1a2332;
+  --bg-header-blue: #1565c0;
+  --bg-header-red: #b71c1c;
+  --border-color: #1e2a3a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #aaa;
+  --text-muted: #888;
+  --accent-blue: #3a7bd5;
+  --accent-green: #00CC44;
+  --accent-orange: #FFA500;
+  --accent-red: #FF2020;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 12px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP NAV */
+.topnav {
+  background: var(--bg-panel);
+  padding: 0 14px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.topnav-title { font-size: 14px; font-weight: 600; color: #fff; }
+.topnav-menu { font-size: 18px; cursor: pointer; color: #aaa; }
+
+/* MAIN LAYOUT */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* LEFT: MAP */
+.map-col {
+  width: 42%;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+#map-container {
+  flex: 1;
+  position: relative;
+  min-height: 200px;
+}
+.map-close {
+  position: absolute;
+  top: 8px; right: 8px;
+  z-index: 999;
+  background: var(--border-color);
+  border: none;
+  color: #fff;
+  width: 22px; height: 22px;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 2px;
+}
+.map-legend {
+  background: var(--bg-panel);
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.legend-line {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* DAFTAR RUAS */
+.daftar-section {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.daftar-title {
+  background: #1a2332;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.daftar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.daftar-col {
+  padding: 8px 12px;
+  border-right: 1px solid var(--border-color);
+}
+.daftar-col:last-child { border-right: none; }
+.daftar-col-title {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  text-align: center;
+}
+.col-blue { background: #1e56a0; color: #fff; }
+.col-green { background: #1a5c2a; color: #fff; }
+.col-orange { background: #b85c00; color: #fff; }
+.col-red { background: #8b1a1a; color: #fff; }
+.daftar-col ul { list-style: none; padding-left: 0; }
+.daftar-col ul li { 
+  font-size: 10px; 
+  color: #bbb; 
+  padding: 8px 10px;
+  border-bottom: 1px solid #1a2332;
+  line-height: 1.4; 
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.daftar-col ul li:hover {
+  background: #1a2332;
+}
+.daftar-col ul li:last-child { border-bottom: none; }
+
+/* RIGHT PANEL */
+.right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--bg-main);
+}
+
+/* SECTION HEADER */
+.section-header {
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+.sh-blue { background: var(--bg-header-blue); }
+.sh-red  { background: var(--bg-header-red); }
+
+/* KONSTRUKSI SECTION */
+.konstruksi-body {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+/* RUAS LIST */
+.ruas-list-panel {
+  width: 250px;
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-color);
+}
+.ruas-list-title {
+  text-align: center;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 1px solid var(--border-color);
+}
+.tab-bar {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+.tab-btn {
+  background: var(--bg-header-blue);
+  color: #fff;
+  border: none;
+  padding: 4px 10px;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.ruas-item {
+  display: flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid #1a2332;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ruas-item:hover { background: #1a2332; }
+.ruas-arrow {
+  color: #4a9eff;
+  font-size: 14px;
+  margin-right: 8px;
+}
+.ruas-name { font-size: 11px; font-weight: 600; color: #e0e0e0; }
+.ruas-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+/* STATS PANEL */
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+/* ONGOING + TOTAL CARDS ROW */
+.cards-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-color);
+  flex: 1;
+}
+.stat-card {
+  background: var(--bg-panel);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--border-color);
+  min-width: 100px;
+  flex: 1;
+}
+.stat-card-label { font-size: 10px; color: var(--text-secondary); text-align: center; margin-bottom: 4px; }
+.stat-card-num { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; }
+.stat-card-sub { font-size: 11px; color: var(--text-secondary); }
+.stat-card-blue { background: var(--bg-header-blue); }
+.stat-card-cyan { background: #007a7a; }
+.stat-card-blue .stat-card-num,
+.stat-card-cyan .stat-card-num { color: #fff; }
+.stat-card-blue .stat-card-label,
+.stat-card-cyan .stat-card-label { color: rgba(255,255,255,0.8); }
+.stat-card-blue .stat-card-sub,
+.stat-card-cyan .stat-card-sub { color: rgba(255,255,255,0.8); }
+
+/* BAR CHART PANEL */
+.bar-chart-panel {
+  background: var(--bg-panel);
+  padding: 12px;
+  flex: 2;
+}
+.bar-chart-title { font-size: 11px; font-weight: 600; color: #fff; margin-bottom: 10px; text-align: center; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.bar-row-label { font-size: 9.5px; color: var(--text-secondary); width: 115px; flex-shrink: 0; line-height: 1.3; }
+.bar-track {
+  flex: 1;
+  background: #1a2332;
+  height: 14px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent-blue);
+  transition: width 0.8s ease;
+}
+.bar-fill-dark { background: #1e4a8a; }
+.bar-fill-mid  { background: #2a63b5; }
+.bar-val { font-size: 10px; color: #ccc; width: 35px; text-align: right; flex-shrink: 0; }
+
+/* PROGRESS ROW */
+.progress-row {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border-color);
+  flex: 1;
+}
+.progress-panel {
+  background: var(--bg-panel);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid var(--border-color);
+  flex: 1;
+}
+.progress-panel-title { font-size: 10px; color: #fff; margin-bottom: 8px; font-weight: 600; }
+
+/* DONUT CHART */
+.donut-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.donut-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* STATUS KONSTRUKSI */
+.status-panel {
+  background: var(--bg-panel);
+  padding: 10px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.status-panel-title { font-size: 10px; color: #fff; margin-bottom: 8px; font-weight: 600; }
+.status-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 6px;
+}
+.status-bar-label { font-size: 9px; color: var(--text-secondary); width: 90px; }
+.status-bar-track {
+  flex: 1;
+  background: #1a2332;
+  height: 14px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.status-bar-fill { height: 100%; border-radius: 2px; }
+.status-bar-val { font-size: 9px; color: #ccc; width: 30px; text-align: right; }
+
+/* ====== PERENCANAAN SECTION ====== */
+.perencanaan-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* RENCANA LIST */
+.rencana-list-panel {
+  width: 250px;
+  flex-shrink: 0;
+  background: #1a0a0a;
+  border-right: 1px solid #2a1a1a;
+}
+.rencana-list-title {
+  text-align: center;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 1px solid #2a1a1a;
+}
+.rencana-item {
+  display: flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-bottom: 1px solid #2a1a1a;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.rencana-item:hover { background: #2a1a1a; }
+.rencana-arrow { color: #e57373; font-size: 14px; margin-right: 8px; }
+.rencana-name { font-size: 11px; font-weight: 600; color: #e0e0e0; }
+.rencana-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+/* RENCANA STATS */
+.rencana-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+.rencana-cards-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #2a1a1a;
+  flex: 1;
+}
+.rencana-card {
+  background: #1a0a0a;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #2a1a1a;
+  flex: 1;
+}
+.rencana-card-label { font-size: 10px; color: var(--text-secondary); text-align: center; margin-bottom: 4px; line-height: 1.3; }
+.rencana-card-num { font-size: 30px; font-weight: 700; color: #fff; }
+.rencana-card-sub { font-size: 10px; color: var(--text-secondary); }
+
+/* PROGRESS PERENCANAAN */
+.prog-rencana-panel {
+  background: #1a0a0a;
+  padding: 10px 14px;
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.prog-rencana-title { font-size: 11px; color: #fff; font-weight: 600; margin-bottom: 10px; text-align: center; }
+.prog-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 7px;
+  gap: 6px;
+}
+.prog-bar-label { font-size: 10px; color: var(--text-secondary); width: 85px; }
+.prog-bar-track {
+  flex: 1;
+  background: #2a1a1a;
+  height: 14px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.prog-bar-fill { height: 100%; border-radius: 2px; }
+.prog-bar-val { font-size: 10px; color: #ccc; width: 35px; text-align: right; }
+.prog-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #666;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+/* Leaflet dark override */
+.leaflet-container { background: #1a2332 !important; }
+.leaflet-control-attribution {
+  background: rgba(0,0,0,0.6) !important;
+  color: #888 !important;
+  font-size: 9px !important;
+}
+.leaflet-control-zoom a {
+  background: var(--border-color) !important;
+  color: #fff !important;
+  border-color: #2a3a4a !important;
+}
+
+/* Scrollbar */
+.right-col::-webkit-scrollbar { width: 4px; }
+.right-col::-webkit-scrollbar-track { background: var(--bg-main); }
+.right-col::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+/* Esri watermark */
+.esri-watermark {
+  position: absolute;
+  bottom: 4px; right: 6px;
+  z-index: 999;
+  font-size: 9px;
+  color: var(--text-secondary);
+  background: rgba(0,0,0,0.5);
+  padding: 2px 4px;
+  pointer-events: none;
+}
+.esri-credit {
+  padding: 3px 10px;
+  font-size: 9px;
+  color: #555;
+  background: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Home icon button on map */
+.leaflet-home-btn {
+  background: var(--border-color);
+  border: none;
+  color: #fff;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}

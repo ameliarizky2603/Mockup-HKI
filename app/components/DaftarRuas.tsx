@@ -1,0 +1,44 @@
+import React from 'react';
+import { RoadSegment } from '../hooks/useJTTSData';
+
+interface Props {
+  allSegments: RoadSegment[];
+  onSelect?: (name: string) => void;
+}
+
+const DaftarRuas: React.FC<Props> = ({ allSegments, onSelect }) => {
+  const getPhaseSegments = (phase: number) => allSegments.filter(s => s.tahap === phase);
+
+  const colClasses = {
+    1: 'col-blue',
+    2: 'col-green',
+    3: 'col-orange',
+    4: 'col-red'
+  };
+
+  return (
+    <div className="daftar-section">
+      <div className="daftar-title">Daftar Ruas JTTS</div>
+      <div className="daftar-grid">
+        {[1, 2, 3, 4].map(phase => (
+          <div key={phase} className="daftar-col">
+            <div className={`daftar-col-title ${colClasses[phase as keyof typeof colClasses]}`}>Ruas Tahap {phase}</div>
+            <ul>
+              {getPhaseSegments(phase).length > 0 ? (
+                getPhaseSegments(phase).map((s, idx) => (
+                  <li key={idx} style={{ cursor: 'pointer' }} onClick={() => onSelect?.(s.name)}>
+                    {s.name.replace('JTTS ', '')}
+                  </li>
+                ))
+              ) : (
+                <li style={{ color: '#555', listStyle: 'none', paddingLeft: 0 }}>Tidak ada ruas</li>
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default DaftarRuas;
