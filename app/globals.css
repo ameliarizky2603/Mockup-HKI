@@ -65,7 +65,7 @@ body {
 #map-container {
   flex: 1;
   position: relative;
-  min-height: 200px;
+  min-height: 0;
 }
 .map-close {
   position: absolute;
@@ -83,10 +83,10 @@ body {
   background: var(--bg-panel);
   padding: 8px 14px;
   display: flex;
-  flex-direction: column;
   gap: 5px;
   border-top: 1px solid var(--border-color);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 .legend-item {
   display: flex;
@@ -111,23 +111,37 @@ body {
 }
 .daftar-title {
   background: #1a2332;
-  padding: 6px 14px;
-  font-size: 12px;
+  padding: 7px 14px; /* Matched to section-header padding */
+  font-size: 13px; /* Matched to section-header size */
   font-weight: 600;
   color: #fff;
   flex-shrink: 0;
+  height: 30px; /* Force consistent height */
+  display: flex;
+  align-items: center;
 }
 .daftar-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
 }
 .daftar-col {
+  display: flex;
+  flex-direction: column;
   padding: 8px 12px;
   border-right: 1px solid var(--border-color);
+  min-height: 0;
 }
+.daftar-list-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+.daftar-list-wrapper::-webkit-scrollbar { width: 3px; }
+.daftar-list-wrapper::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
 .daftar-col:last-child { border-right: none; }
 .daftar-col-title {
   font-size: 11px;

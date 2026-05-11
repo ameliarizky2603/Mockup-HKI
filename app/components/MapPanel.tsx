@@ -176,12 +176,6 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
         )}
       </div>
       <div className="esri-credit">Esri, TomTom, Garmin, FAO, NOAA, USGS</div>
-      <div className="map-legend">
-        <div className="legend-item"><div className="legend-line" style={{ background: '#FFD700' }}></div>On Going Konstruksi</div>
-        <div className="legend-item"><div className="legend-line" style={{ background: '#FFA500' }}></div>Tahap Konstruksi Lanjutan</div>
-        <div className="legend-item"><div className="legend-line" style={{ background: '#FF2020' }}></div>Tahap Perencanaan</div>
-        <div className="legend-item"><div className="legend-line" style={{ background: '#00CC44' }}></div>Selesai Beroperasi</div>
-      </div>
     </>
   );
 };
