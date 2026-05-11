@@ -37,23 +37,31 @@ export default function Home() {
       <div className="main">
         {/* LEFT: MAP + LEGEND + DAFTAR */}
         <div className="map-col">
-          <MapPanel routes={jttsData.mapRoutes} locations={jttsData.mapLocations} selectedRouteName={selectedRouteName} />
-          <DaftarRuas allSegments={jttsData.allSegments} onSelect={(name) => setSelectedRouteName(name)} />
+          <div className="left-panel-top" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <MapPanel routes={jttsData.mapRoutes} locations={jttsData.mapLocations} selectedRouteName={selectedRouteName} />
+          </div>
+          <div className="left-panel-bottom" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <DaftarRuas allSegments={jttsData.allSegments} onSelect={(name) => setSelectedRouteName(name)} />
+          </div>
         </div>
 
         {/* RIGHT: PANELS */}
         <div className="right-col">
-          <ConstructionPanel 
-            segments={jttsData.constructionSegments} 
-            stats={jttsData.constructionStats} 
-            totalLength={jttsData.totalLength} 
-            onSelect={(name) => setSelectedRouteName(name)}
-          />
-          <PlanningPanel 
-            segments={jttsData.planningSegments} 
-            stats={jttsData.planningStats} 
-            onSelect={(name) => setSelectedRouteName(name)}
-          />
+          <div className="right-panel-top" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <ConstructionPanel 
+              segments={jttsData.constructionSegments} 
+              stats={jttsData.constructionStats} 
+              totalLength={jttsData.totalLength} 
+              onSelect={(name) => setSelectedRouteName(name)}
+            />
+          </div>
+          <div className="right-panel-bottom" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <PlanningPanel 
+              segments={jttsData.planningSegments} 
+              stats={jttsData.planningStats} 
+              onSelect={(name) => setSelectedRouteName(name)}
+            />
+          </div>
         </div>
       </div>
     </>
