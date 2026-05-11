@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapRoute, MapLocation } from '../hooks/useJTTSData';
@@ -16,72 +16,29 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
   const mapInstance = useRef<maplibregl.Map | null>(null);
   const [active360, setActive360] = useState<MapRoute | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentStyle, setCurrentStyle] = useState<'dark' | 'satellite'>('dark');
+  
   const viewerRef = useRef<any>(null);
-  // Store route references for click handler
   const routesRef = useRef<MapRoute[]>(routes);
   routesRef.current = routes;
+  
+  // Track rendered elements to prevent duplicates during style changes
+  const markersRef = useRef<maplibregl.Marker[]>([]);
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainerRef.current || mapInstance.current) return;
+  const STYLES = {
+    dark: 'https://basemap.mapid.io/styles/dark/style.json?key=67aacc7e051d92f468af03c4',
+    satellite: 'https://basemap.mapid.io/styles/satellite/style.json?key=67aacc7e051d92f468af03c4'
+  };
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: 'https://basemap.mapid.io/styles/dark/style.json?key=67aacc7e051d92f468af03c4',
-      center: [102.5, 1.5],
-      zoom: 4.5,
-      attributionControl: false
-    });
-
-    // Add attribution
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
-
-    // Add zoom control
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-
-    map.on('load', () => {
-      setMapLoaded(true);
-    });
-
-    // Suppress "missing image" warnings from basemap by adding dummy transparent image
-    map.on('styleimagemissing', (e) => {
-      const id = e.id;
-      if (!map.hasImage(id)) {
-        const width = 1;
-        const height = 1;
-        const data = new Uint8Array(width * height * 4); // transparent pixel
-        map.addImage(id, { width, height, data });
-      }
-    });
-
-    // Prevent native browser drag
-    mapContainerRef.current.addEventListener('dragstart', (e) => {
-      e.preventDefault();
-    });
-
-    mapInstance.current = map;
-
-    return () => {
-      map.remove();
-      mapInstance.current = null;
-      setMapLoaded(false);
-    };
-  }, []);
-
-  // Add routes and locations after map loads
-  useEffect(() => {
-    const map = mapInstance.current;
-    if (!map || !mapLoaded) return;
-
-    // Add route sources and layers
-    routes.forEach((r, i) => {
+  // Function to add Route layers (needed because setStyle clears them)
+  const renderLayers = useCallback((map: maplibregl.Map) => {
+    routesRef.current.forEach((r, i) => {
       const sourceId = `route-${i}`;
       const layerId = `route-line-${i}`;
 
-      // coords are stored as [lat, lng] from useJTTSData, convert to [lng, lat] for MapLibre
-      const coordinates = r.coords.map(c => [c[1], c[0]]);
+      if (map.getSource(sourceId)) return;
 
-      if (map.getSource(sourceId)) return; // Already added
+      const coordinates = r.coords.map(c => [c[1], c[0]]);
 
       map.addSource(sourceId, {
         type: 'geojson',
@@ -102,7 +59,7 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
         paint: {
           'line-color': r.color,
           'line-width': 6,
-          'line-opacity': 0.8
+          'line-opacity': 0.9
         },
         layout: {
           'line-cap': 'round',
@@ -110,7 +67,7 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
         }
       });
 
-      // Hover effects
+      // Attach event listeners for interactivity
       map.on('mouseenter', layerId, () => {
         map.getCanvas().style.cursor = 'pointer';
         map.setPaintProperty(layerId, 'line-width', 10);
@@ -120,10 +77,9 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
       map.on('mouseleave', layerId, () => {
         map.getCanvas().style.cursor = '';
         map.setPaintProperty(layerId, 'line-width', 6);
-        map.setPaintProperty(layerId, 'line-opacity', 0.8);
+        map.setPaintProperty(layerId, 'line-opacity', 0.9);
       });
 
-      // Tooltip popup on hover
       const popup = new maplibregl.Popup({
         closeButton: false,
         closeOnClick: false,
@@ -141,16 +97,21 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
         popup.remove();
       });
 
-      // Click to open 360
       map.on('click', layerId, (e) => {
         e.originalEvent.stopPropagation();
         setActive360(routesRef.current[i]);
       });
     });
+  }, []);
 
-    // Add location markers
-    locations.forEach(loc => {
-      // Circle dot marker
+  // Function to add/refresh Markers
+  const renderMarkers = useCallback((map: maplibregl.Map, locs: MapLocation[]) => {
+    // Clean up existing markers first
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    locs.forEach(loc => {
+      // Dot marker
       const dotEl = document.createElement('div');
       dotEl.style.cssText = `
         width: 10px; height: 10px;
@@ -159,32 +120,104 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
         border-radius: 50%;
         pointer-events: none;
         user-select: none;
+        box-shadow: 0 0 4px rgba(0,0,0,0.5);
       `;
 
-      new maplibregl.Marker({ element: dotEl })
+      const dotMarker = new maplibregl.Marker({ element: dotEl })
         .setLngLat([loc.lng, loc.lat])
         .addTo(map);
+      markersRef.current.push(dotMarker);
 
-      // Text label
+      // Label marker
       const labelEl = document.createElement('div');
       labelEl.style.cssText = `
-        color: #fff; font-size: 9px; font-weight: 600;
-        background: rgba(0,0,0,0.55);
-        padding: 1px 3px; border-radius: 2px;
+        color: #fff; font-size: 9px; font-weight: 700;
+        background: rgba(0,0,0,0.65);
+        padding: 2px 4px; border-radius: 3px;
         white-space: nowrap;
         user-select: none; pointer-events: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
       `;
       labelEl.setAttribute('draggable', 'false');
       labelEl.textContent = loc.name.replace('\n', ' ');
 
-      new maplibregl.Marker({ element: labelEl, anchor: 'top-left', offset: [8, -8] })
+      const labelMarker = new maplibregl.Marker({ element: labelEl, anchor: 'top-left', offset: [8, -8] })
         .setLngLat([loc.lng, loc.lat])
         .addTo(map);
+      markersRef.current.push(labelMarker);
+    });
+  }, []);
+
+  // Initialize base map object only once
+  useEffect(() => {
+    if (!mapContainerRef.current || mapInstance.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: STYLES.dark,
+      center: [102.5, 1.5],
+      zoom: 4.5,
+      attributionControl: false
     });
 
-  }, [mapLoaded, routes, locations]);
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
-  // Fly to selected route
+    // Crucial: We must listen for 'style.load' so when setStyle triggers, we re-add layers
+    map.on('style.load', () => {
+      renderLayers(map);
+    });
+
+    map.on('load', () => {
+      setMapLoaded(true);
+      // Initial layer and marker load
+      renderLayers(map);
+      renderMarkers(map, locations);
+    });
+
+    map.on('styleimagemissing', (e) => {
+      const id = e.id;
+      if (!map.hasImage(id)) {
+        const width = 1;
+        const height = 1;
+        const data = new Uint8Array(width * height * 4);
+        map.addImage(id, { width, height, data });
+      }
+    });
+
+    mapContainerRef.current.addEventListener('dragstart', (e) => e.preventDefault());
+
+    mapInstance.current = map;
+
+    return () => {
+      map.remove();
+      mapInstance.current = null;
+      setMapLoaded(false);
+    };
+  }, []); // Empty deps, strictly init map once
+
+  // Handle external data updates (e.g. dynamic reload of locations/routes)
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (map && mapLoaded) {
+      renderMarkers(map, locations);
+      // Re-render layers if they weren't already drawn
+      renderLayers(map);
+    }
+  }, [locations, mapLoaded, renderLayers, renderMarkers]);
+
+  // Effect to handle switching style via state
+  const toggleBasemap = (styleName: 'dark' | 'satellite') => {
+    const map = mapInstance.current;
+    if (!map || styleName === currentStyle) return;
+    
+    setCurrentStyle(styleName);
+    map.setStyle(STYLES[styleName]);
+    // The 'style.load' event above will auto-inject custom route layers back once ready!
+  };
+
+  // Fly to logic
   useEffect(() => {
     const map = mapInstance.current;
     if (!selectedRouteName || !map || !mapLoaded) return;
@@ -200,7 +233,7 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
     }
   }, [selectedRouteName, routes, mapLoaded]);
 
-  // Pannellum 360 viewer
+  // Pannellum 360 Logic
   useEffect(() => {
     if (active360?.photo360) {
       const timer = setTimeout(() => {
@@ -221,6 +254,55 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
     <div id="map-wrapper" style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div id="map-container" ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
       <button className="map-close">✕</button>
+
+      {/* Basemap Switcher UI Component */}
+      <div className="basemap-switcher" style={{
+        position: 'absolute',
+        top: '12px',
+        left: '12px',
+        zIndex: 1000,
+        display: 'flex',
+        gap: '4px',
+        background: 'rgba(17, 24, 39, 0.8)',
+        backdropFilter: 'blur(4px)',
+        padding: '3px',
+        borderRadius: '6px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+      }}>
+        <button 
+          onClick={() => toggleBasemap('dark')}
+          style={{
+            padding: '4px 8px',
+            fontSize: '10px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            background: currentStyle === 'dark' ? '#2563eb' : 'transparent',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            transition: 'all 0.2s'
+          }}
+        >
+          Dark
+        </button>
+        <button 
+          onClick={() => toggleBasemap('satellite')}
+          style={{
+            padding: '4px 8px',
+            fontSize: '10px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            background: currentStyle === 'satellite' ? '#2563eb' : 'transparent',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            transition: 'all 0.2s'
+          }}
+        >
+          Satellite
+        </button>
+      </div>
 
       {active360 && (
         <div className="modal-overlay" onClick={() => setActive360(null)} style={{
