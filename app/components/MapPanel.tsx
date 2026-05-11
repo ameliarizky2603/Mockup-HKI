@@ -49,19 +49,19 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
 
     // Draw routes
     routes.forEach(r => {
-      const poly = L.polyline(r.coords as L.LatLngExpression[], { 
-        color: r.color, 
-        weight: 6, 
-        opacity: 0.8 
+      const poly = L.polyline(r.coords as L.LatLngExpression[], {
+        color: r.color,
+        weight: 6,
+        opacity: 0.8
       }).addTo(map);
 
-      poly.on('mouseover', function(e) {
-        this.setStyle({ weight: 10, opacity: 1 });
+      poly.on('mouseover', (e: any) => {
+        e.target.setStyle({ weight: 10, opacity: 1 });
       });
-      poly.on('mouseout', function(e) {
-        this.setStyle({ weight: 6, opacity: 0.8 });
+      poly.on('mouseout', (e: any) => {
+        e.target.setStyle({ weight: 6, opacity: 0.8 });
       });
-      
+
       poly.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
         setActive360(r);
@@ -82,13 +82,13 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
 
     locations.forEach(loc => {
       L.circleMarker([loc.lat, loc.lng], markerStyle(loc.color)).addTo(map);
-      
+
       const label = L.divIcon({
         className: 'map-label-icon',
-        html: `<div style="color:#fff;font-size:9px;font-weight:600;background:rgba(0,0,0,0.55);padding:1px 3px;border-radius:2px;white-space:nowrap;">${loc.name.replace('\n','<br>')}</div>`,
+        html: `<div style="color:#fff;font-size:9px;font-weight:600;background:rgba(0,0,0,0.55);padding:1px 3px;border-radius:2px;white-space:nowrap;">${loc.name.replace('\n', '<br>')}</div>`,
         iconAnchor: [-8, 8]
       });
-      
+
       L.marker([loc.lat, loc.lng], { icon: label }).addTo(map);
     });
 
@@ -172,10 +172,10 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
       </div>
       <div className="esri-credit">Esri, TomTom, Garmin, FAO, NOAA, USGS</div>
       <div className="map-legend">
-        <div className="legend-item"><div className="legend-line" style={{background:'#FFD700'}}></div>On Going Konstruksi</div>
-        <div className="legend-item"><div className="legend-line" style={{background:'#FFA500'}}></div>Tahap Konstruksi Lanjutan</div>
-        <div className="legend-item"><div className="legend-line" style={{background:'#FF2020'}}></div>Tahap Perencanaan</div>
-        <div className="legend-item"><div className="legend-line" style={{background:'#00CC44'}}></div>Selesai Beroperasi</div>
+        <div className="legend-item"><div className="legend-line" style={{ background: '#FFD700' }}></div>On Going Konstruksi</div>
+        <div className="legend-item"><div className="legend-line" style={{ background: '#FFA500' }}></div>Tahap Konstruksi Lanjutan</div>
+        <div className="legend-item"><div className="legend-line" style={{ background: '#FF2020' }}></div>Tahap Perencanaan</div>
+        <div className="legend-item"><div className="legend-line" style={{ background: '#00CC44' }}></div>Selesai Beroperasi</div>
       </div>
     </>
   );
