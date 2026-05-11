@@ -37,11 +37,10 @@ const MapPanel: React.FC<Props> = ({ routes, locations, selectedRouteName }) => 
       attributionControl: true
     });
 
-    // Dark tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      subdomains: 'abcd',
-      maxZoom: 19
+    // MapID Satellite style
+    (L as any).maplibreGL({
+      style: 'https://basemap.mapid.io/styles/satellite/style.json?key=false',
+      attribution: '&copy; MapID'
     }).addTo(map);
 
     // Custom zoom control
