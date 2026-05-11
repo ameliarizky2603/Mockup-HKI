@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
 
 :root {
   --bg-main: #0d1117;
@@ -21,6 +20,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 body {
@@ -32,6 +36,8 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* TOP NAV */
@@ -470,52 +476,45 @@ body {
   padding: 0 2px;
 }
 
-/* Leaflet dark override */
-.leaflet-container { background: #1a2332 !important; }
-.leaflet-control-attribution {
+/* MapLibre GL overrides */
+#map-container {
+  background: #0d1117 !important;
+}
+.maplibregl-ctrl-attrib {
   background: rgba(0,0,0,0.6) !important;
   color: #888 !important;
   font-size: 9px !important;
 }
-.leaflet-control-zoom a {
+.maplibregl-ctrl-group button {
   background: var(--border-color) !important;
   color: #fff !important;
   border-color: #2a3a4a !important;
+}
+.maplibregl-ctrl-group button span {
+  filter: invert(1);
+}
+
+/* Route tooltip popup */
+.route-tooltip .maplibregl-popup-content {
+  background: rgba(0,0,0,0.8);
+  border-radius: 4px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.route-tooltip .maplibregl-popup-tip {
+  display: none;
+}
+
+/* Prevent native drag on map markers */
+#map-wrapper img,
+#map-wrapper .maplibregl-marker,
+#map-wrapper .maplibregl-marker * {
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  pointer-events: none;
 }
 
 /* Scrollbar */
 .right-col::-webkit-scrollbar { width: 4px; }
 .right-col::-webkit-scrollbar-track { background: var(--bg-main); }
 .right-col::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
-
-/* Esri watermark */
-.esri-watermark {
-  position: absolute;
-  bottom: 4px; right: 6px;
-  z-index: 999;
-  font-size: 9px;
-  color: var(--text-secondary);
-  background: rgba(0,0,0,0.5);
-  padding: 2px 4px;
-  pointer-events: none;
-}
-.esri-credit {
-  padding: 3px 10px;
-  font-size: 9px;
-  color: #555;
-  background: var(--bg-main);
-  border-top: 1px solid var(--border-color);
-}
-
-/* Home icon button on map */
-.leaflet-home-btn {
-  background: var(--border-color);
-  border: none;
-  color: #fff;
-  width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  border-radius: 2px;
-  margin-bottom: 2px;
-}
